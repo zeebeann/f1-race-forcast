@@ -36,46 +36,91 @@ function displayRaceInfo(race) {
   // 1) race.schedule exists with nested events (race.schedule.race, qualy, fp1...)
   // 2) older shape with top-level date/time and circuit info
 
+  // Header (title + round)
   let html = `
-    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f5f5f5, #e0e0e0); border-radius: 10px; margin: 20px 0;">
+    <div style="text-align: center; padding: 20px; background: transparent; border-radius: 10px; margin: 20px 0;">
       <h2 style="color: #d32f2f; margin: 0 0 10px 0;">${race.raceName || race.name || ''}</h2>
       <p style="font-size: 16px; margin: 6px 0;"><strong>Round:</strong> ${race.round || ''} ${race.season ? ('of ' + race.season) : ''}</p>
   `;
 
-  // If circuit/location available (older shape)
+  // Circuit info (if present)
   if (race.circuit && race.circuit.name) {
     html += `<p style="font-size:14px; margin:6px 0"><strong>Circuit:</strong> ${race.circuit.name} — ${race.circuit.location.city}, ${race.circuit.location.country}</p>`;
   }
 
-  // If schedule object exists, list each event
+  // Events: split into two rows. Top row for practice/qualifying, bottom row for Sprint Race and Race (larger)
   const schedule = race.schedule || {};
-  const eventOrder = ['fp1', 'fp2', 'fp3', 'qualy', 'sprintQualy', 'sprintRace', 'race'];
+  const topOrder = ['fp1', 'fp2', 'fp3', 'qualy', 'sprintQualy'];
+  const bottomOrder = ['sprintRace', 'race'];
 
-  html += '<div style="margin-top:12px; text-align:left; display:inline-block;">';
-  html += '<table style="border-collapse:collapse; font-size:14px;"><tbody>';
+  let foundAny = false;
 
-  let foundEvent = false;
-  for (const key of eventOrder) {
+  // Top row (smaller cards)
+  html += '<div id="events-top" style="margin-top:16px; display:flex; flex-direction:row; gap:12px; align-items:flex-start; justify-content:center; overflow-x:auto; padding:8px 12px;">';
+  for (const key of topOrder) {
     const ev = schedule[key];
     if (ev && (ev.date || ev.time)) {
-      foundEvent = true;
-      const dtStr = formatEvent(ev.date, ev.time);
-      const label = key.toUpperCase();
-      html += `<tr><td style="padding:6px 12px; font-weight:600">${label}</td><td style="padding:6px 12px">${dtStr}</td></tr>`;
+      foundAny = true;
+      html += createEventHTML(key, ev, false);
     }
   }
+  html += '</div>'; // events-top
 
-  // Fallback for older flat fields
-  if (!foundEvent && (race.date || race.time)) {
-    const dtStr = formatEvent(race.date, race.time);
-    html += `<tr><td style="padding:6px 12px; font-weight:600">RACE</td><td style="padding:6px 12px">${dtStr}</td></tr>`;
+  // Bottom row (larger, more prominent cards)
+  html += '<div id="events-bottom" style="margin-top:12px; display:flex; flex-direction:row; gap:18px; align-items:flex-start; justify-content:center; overflow-x:auto; padding:8px 12px;">';
+  for (const key of bottomOrder) {
+    const ev = schedule[key];
+    if (ev && (ev.date || ev.time)) {
+      foundAny = true;
+      html += createEventHTML(key, ev, true);
+    }
+  }
+  html += '</div>'; // events-bottom
+
+  // Fallback for older flat fields (top-level date/time) -> render as large bottom card
+  if (!foundAny && (race.date || race.time)) {
+    html += '<div id="events-bottom" style="margin-top:12px; display:flex; justify-content:center;">';
+    html += createEventHTML('race', { date: race.date, time: race.time }, true);
+    html += '</div>';
   }
 
-  html += '</tbody></table></div>';
-
-  html += '</div>';
+  // If no events at all
+  if (!foundAny && !(race.date || race.time)) {
+    html += `<div style="padding:12px; color:#666">No schedule available</div>`;
+  }
+  html += '</div>'; // main wrapper
 
   comparisonDiv.innerHTML = html;
+}
+
+// Helper to build an event card HTML string
+function createEventHTML(eventKey, ev, large = false) {
+  const eventLabels = {
+    fp1: 'Practice 1',
+    fp2: 'Practice 2',
+    fp3: 'Practice 3',
+    qualy: 'Qualifying',
+    sprintQualy: 'Sprint Qualifying',
+    sprintRace: 'Sprint Race',
+    race: 'Race'
+  };
+  const label = eventLabels[eventKey] || eventKey.toUpperCase();
+  const dateStr = ev.date || null;
+  const timeStr = ev.time || null;
+  const iso = (dateStr && timeStr) ? `${dateStr}T${timeStr}` : '';
+  const local = formatEvent(dateStr, timeStr);
+  // Adjust styling for large (bottom-row) cards
+  const cardWidth = large ? 340 : 220;
+  const titleSize = large ? '16px' : '14px';
+  const dateSize = large ? '15px' : '14px';
+
+  // Minimal styling; each card has data attributes for later weather API use
+  return `
+    <div class="event-card" data-event="${eventKey}" data-iso="${iso}" style="flex:0 0 ${cardWidth}px; width:${cardWidth}px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.10); padding:12px; text-align:left;">
+      <p style="margin:0 0 8px 0; font-weight:700; font-size:${titleSize}">${label}</p>
+      <p style="margin:0; color:#333; font-size:${dateSize}">${local}</p>
+    </div>
+  `;
 }
 
 // Helper to format event date/time (returns readable string or 'TBA')
