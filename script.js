@@ -19,6 +19,12 @@ async function fetchRaceScheduleByRaceId(raceId) {
     console.log('Found race:', race);
 
     if (race) {
+      // Extract city/country for the selected race (useful for weather lookups)
+      const circuit = race.circuit || {};
+      const city = (circuit.city) || (circuit.location && (circuit.location.city || circuit.location.locality)) || '';
+      const country = (circuit.country) || (circuit.location && circuit.location.country) || '';
+      console.log('Selected race location:', { raceId: race.raceId || race.round, city, country });
+
       displayRaceInfo(race);
     } else {
       comparisonDiv.innerHTML = '<p style="color:red">Race schedule not found for that raceId.</p>';
@@ -61,7 +67,7 @@ function displayRaceInfo(race) {
     const ev = schedule[key];
     if (ev && (ev.date || ev.time)) {
       foundAny = true;
-      html += createEventHTML(key, ev, false);
+      html += createEventHTML(key, ev, false, race.circuit);
     }
   }
   html += '</div>'; // events-top
@@ -72,7 +78,7 @@ function displayRaceInfo(race) {
     const ev = schedule[key];
     if (ev && (ev.date || ev.time)) {
       foundAny = true;
-      html += createEventHTML(key, ev, true);
+      html += createEventHTML(key, ev, true, race.circuit);
     }
   }
   html += '</div>'; // events-bottom
@@ -80,7 +86,7 @@ function displayRaceInfo(race) {
   // Fallback for older flat fields (top-level date/time) -> render as large bottom card
   if (!foundAny && (race.date || race.time)) {
     html += '<div id="events-bottom" style="margin-top:12px; display:flex; justify-content:center;">';
-    html += createEventHTML('race', { date: race.date, time: race.time }, true);
+    html += createEventHTML('race', { date: race.date, time: race.time }, true, race.circuit);
     html += '</div>';
   }
 
@@ -94,7 +100,7 @@ function displayRaceInfo(race) {
 }
 
 // Helper to build an event card HTML string
-function createEventHTML(eventKey, ev, large = false) {
+function createEventHTML(eventKey, ev, large = false, circuit = null) {
   const eventLabels = {
     fp1: 'Practice 1',
     fp2: 'Practice 2',
@@ -109,6 +115,9 @@ function createEventHTML(eventKey, ev, large = false) {
   const timeStr = ev.time || null;
   const iso = (dateStr && timeStr) ? `${dateStr}T${timeStr}` : '';
   const local = formatEvent(dateStr, timeStr);
+  // Determine circuit city/country (support multiple shapes)
+  const city = (circuit && (circuit.city || (circuit.location && (circuit.location.city || circuit.location.locality)))) || '';
+  const country = (circuit && (circuit.country || (circuit.location && circuit.location.country))) || '';
   // Adjust styling for large (bottom-row) cards
   const cardWidth = large ? 340 : 220;
   const titleSize = large ? '16px' : '14px';
@@ -116,7 +125,7 @@ function createEventHTML(eventKey, ev, large = false) {
 
   // Minimal styling; each card has data attributes for later weather API use
   return `
-    <div class="event-card" data-event="${eventKey}" data-iso="${iso}" style="flex:0 0 ${cardWidth}px; width:${cardWidth}px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.10); padding:12px; text-align:left;">
+    <div class="event-card" data-event="${eventKey}" data-iso="${iso}" data-city="${city}" data-country="${country}" style="flex:0 0 ${cardWidth}px; width:${cardWidth}px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.10); padding:12px; text-align:left;">
       <p style="margin:0 0 8px 0; font-weight:700; font-size:${titleSize}">${label}</p>
       <p style="margin:0; color:#333; font-size:${dateSize}">${local}</p>
     </div>
@@ -141,3 +150,5 @@ driver1Select.addEventListener('change', (e) => {
     comparisonDiv.innerHTML = '';
   }
 });
+
+// (Removed bulk-fetch helper) We now fetch city/country for the selected race only.
