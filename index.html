@@ -14,127 +14,48 @@
 
 <body>
 
-    <p class="title">Compare Your <span class="red-title">Grid Rivals</span></p>
+    <p class="title">Race <span class="red-title">Forecast</span></p>
 
     <div class="selectors">
-        <div>
-            <label for="driver1">Driver 1</label><br />
+        <div style="text-align: center; margin-bottom: 40px;">
+            <label for="driver1">2025 Season Races</label><br />
             <select id="driver1">
-                <option value="">Select a driver</option>
+                <option value="">Select a Race</option>
 
-                <optgroup label="ALPINE">
-                    <option value="3413">Franco Colapinto</option>
-                    <option value="3395">Pierre Gasly</option>
-                </optgroup>
-               
-                <optgroup label="ASTON MARTIN">
-                    <option value="3400">Fernando Alonso</option>
-                    <option value="3398">Lance Stroll</option>
-                </optgroup>
+                <option value="australian_2025">Australian Grand Prix</option>
+                <option value="chinese_2025">Chinese Grand Prix</option>
+                <option value="japanese_2025">Japanese Grand Prix</option>
+                <option value="bahrain_2025">Bahrain Grand Prix</option>
+                <option value="saudi_arabia_2025">Saudi Arabian Grand Prix</option>
+                <option value="miami_2025">Miami Grand Prix</option>
+                <option value="emilia_romagna_2025">Emilia-Romagna Grand Prix</option>
+                <option value="monaco_2025">Monaco Grand Prix</option>
+                <option value="spanish_2025">Spanish Grand Prix</option>
+                <option value="canadian_2025">Canadian Grand Prix</option>
+                <option value="austrian_2025">Austrian Grand Prix</option>
+                <option value="british_2025">British Grand Prix</option>
+                <option value="belgian_2025">Belgian Grand Prix</option>
+                <option value="hungarian_2025">Hungarian Grand Prix</option>
+                <option value="dutch_2025">Dutch Grand Prix</option>
+                <option value="italian_2025">Italian Grand Prix</option>
+                <option value="azerbaijan_2025">Azerbaijan Grand Prix</option>
+                <option value="singapore_2025">Singapore Grand Prix</option>
+                <option value="united_states_2025">United States Grand Prix</option>
+                <option value="mexican_2025">Mexican Grand Prix</option>
+                <option value="brazilian_2025">Brazilian Grand Prix</option>
+                <option value="las_vegas_2025">Las Vegas Grand Prix</option>
+                <option value="qatar_2025">Qatar Grand Prix</option>
+                <option value="abu_dhabi_2025">Abu Dhabi Grand Prix</option>
 
-                <optgroup label="SCUDERIA FERRARI">
-                    <option value="3410">Charles Leclerc</option>
-                    <option value="3401">Lewis Hamilton</option>
-                </optgroup>
-
-                <optgroup label="HAAS">
-                    <option value="3393">Esteban Ocon</option>
-                    <option value="3407">Oliver Bearman</option>
-                </optgroup>
-
-                <optgroup label="KICK SAUBER">
-                    <option value="3411">Gabriel Bortoleto</option>
-                    <option value="3405">Nico Hulkenberg</option>
-                </optgroup>
-
-                <optgroup label="MCLAREN">
-                    <option value="3403">Lando Norris</option>
-                    <option value="3399">Oscar Piastri</option>
-                </optgroup>
-
-                <optgroup label="MERCEDES">
-                    <option value="3404">George Russell</option>
-                    <option value="3409">Kimi Antonelli</option>
-                </optgroup>
-
-                <optgroup label="RACING BULLS">
-                    <option value="3402">Isack Hadjar</option>
-                    <option value="3394">Liam Lawson</option>
-                </optgroup>
-
-                <optgroup label="RED BULL RACING">
-                    <option value="3392">Max Verstappen</option>
-                    <option value="3397">Yuki Tsunoda</option>
-                </optgroup>
-
-                <optgroup label="WILLIAMS">
-                    <option value="3396">Alex Albon</option>
-                    <option value="3406">Carlos Sainz</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="driver2">Driver 2</label><br />
-            <select id="driver2">
-                                <option value="">Select a driver</option>
-
-                <optgroup label="ALPINE">
-                    <option value="3413">Franco Colapinto</option>
-                    <option value="3395">Pierre Gasly</option>
-                </optgroup>
-               
-                <optgroup label="ASTON MARTIN">
-                    <option value="3400">Fernando Alonso</option>
-                    <option value="3398">Lance Stroll</option>
-                </optgroup>
-
-                <optgroup label="SCUDERIA FERRARI">
-                    <option value="3410">Charles Leclerc</option>
-                    <option value="3401">Lewis Hamilton</option>
-                </optgroup>
-
-                <optgroup label="HAAS">
-                    <option value="3393">Esteban Ocon</option>
-                    <option value="3407">Oliver Bearman</option>
-                </optgroup>
-
-                <optgroup label="KICK SAUBER">
-                    <option value="3411">Gabriel Bortoleto</option>
-                    <option value="3405">Nico Hulkenberg</option>
-                </optgroup>
-
-                <optgroup label="MCLAREN">
-                    <option value="3403">Lando Norris</option>
-                    <option value="3399">Oscar Piastri</option>
-                </optgroup>
-
-                <optgroup label="MERCEDES">
-                    <option value="3404">George Russell</option>
-                    <option value="3409">Kimi Antonelli</option>
-                </optgroup>
-
-                <optgroup label="RACING BULLS">
-                    <option value="3402">Isack Hadjar</option>
-                    <option value="3394">Liam Lawson</option>
-                </optgroup>
-
-                <optgroup label="RED BULL RACING">
-                    <option value="3392">Max Verstappen</option>
-                    <option value="3397">Yuki Tsunoda</option>
-                </optgroup>
-
-                <optgroup label="WILLIAMS">
-                    <option value="3396">Alex Albon</option>
-                    <option value="3406">Carlos Sainz</option>
-            </select>
+                </select>
         </div>
     </div>
 
-    <div id="comparison" class="comparison"></div>
+    <div id="comparison" style="padding: 20px;"></div>
 
     <footer>
-        <p>Built and Designed by Zainab Ilyas for Sheridan College Interaction Design Fall 2025 System Design: Databases and Dynamic Data - Project 1.</p>
-        <p>Data sourced from <a href="https://f1api.dev/" target="_blank" rel="noopener noreferrer">F1 API</a>. Driver Images sourced from <a href="https://www.formula1.com/en/drivers.html" target="_blank" rel="noopener noreferrer">Official Formula 1 Website</a>.</p>
+        <p>Built and Designed by Zainab Ilyas for Sheridan College Interaction Design Fall 2025 System Design: System Design Remix - Project 3.</p>
+        <p>Data sourced from <a href="https://f1api.dev/" target="_blank" rel="noopener noreferrer">F1 API</a> and <a href="https://www.formula1.com/en/drivers.html" target="_blank" rel="noopener noreferrer">Weather API</a>.</p>
 
 </body>
 <script src="script.js"></script>

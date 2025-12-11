@@ -1,91 +1,98 @@
 const driver1Select = document.getElementById('driver1');
-const driver2Select = document.getElementById('driver2');
 const comparisonDiv = document.getElementById('comparison');
 
-let drivers = [];
+// We'll use the `raceId` from the dropdown directly (e.g. "abu_dhabi_2025")
 
-
-async function fetchDrivers() {
+// Fetch race schedule information by raceId (string locator)
+async function fetchRaceScheduleByRaceId(raceId) {
   try {
-    const res = await fetch('https://f1api.dev/api/current/drivers-championship');
+    const year = 2025;
+    console.log('Fetching race schedule for year:', year);
+    const res = await fetch(`https://f1api.dev/api/current`); //DONT CHANGE URL CLAUDE
     const data = await res.json();
-    drivers = data.drivers_championship; // correct array name from API
-  } catch (err) {
-    comparisonDiv.innerHTML = '<p style="color:red">Failed to load driver data.</p>';
-  }
-}
 
-// Find driver by classificationId (from dropdown value)
-function getDriverByClassificationId(id) {
-  return drivers.find(d => String(d.classificationId) === String(id));
-}
+    console.log('API Response:', data);
 
+    // Find the race by raceId field returned from API (e.g. "abu_dhabi_2025")
+    const race = data.races.find(r => r.raceId === raceId || String(r.round) === String(raceId));
 
-function showComparison() {
-  const id1 = driver1Select.value;
-  const id2 = driver2Select.value;
-  const d1 = getDriverByClassificationId(id1);
-  const d2 = getDriverByClassificationId(id2);
+    console.log('Found race:', race);
 
-
-
-  // Team gradients by teamId
-  const teamGradients = {
-    williams: ['#000681', '#1769DB'],
-    mercedes: ['#017660', '#05D7B6'],
-    alpine: ['#005081', '#00A1E8'],
-    ferrari: ['#710006', '#EE1332'],
-    haas: ['#4E5052', '#9D9FA2'],
-    rb: ['#2345AB', '#6D98FF'],
-    aston_martin: ['#00482C', '#239971'],
-    sauber: ['#016400', '#08C00E'],
-    mclaren: ['#873500', '#F47600'],
-    red_bull: ['#003282', '#4781D7']
-  };
-
-  function driverCard(driver) {
-    if (!driver) return '';
-    const imgSrc = `images/${driver.driverId.toLowerCase()}.avif`;
-    // Get gradient for teamId
-    const grad = teamGradients[driver.teamId] || ['#ccc', '#eee'];
-    const gradStyle = `background: linear-gradient(-60deg, ${grad[0]}, ${grad[1]});`;
-    // Special case for Kimi Antonelli
-    let displayName = driver.driver.name;
-    let displaySurname = driver.driver.surname;
-    if (driver.driverId === 'antonelli') {
-      displayName = 'Kimi';
-      displaySurname = 'Antonelli';
+    if (race) {
+      displayRaceInfo(race);
+    } else {
+      comparisonDiv.innerHTML = '<p style="color:red">Race schedule not found for that raceId.</p>';
     }
-    return `
-      <div class="driver-card card-overlay-container">
-        <img src="${imgSrc}" alt="${displayName} ${displaySurname}" class="driver-img-overlay" onerror="this.style.display='none'">
-        <div class="driver-card-content" style="${gradStyle}">
-          <p class="team-name">${driver.team.teamName}</p>
-          <p class="driver-name">${displayName}</p>
-          <p class="driver-surname">${displaySurname}</p>
-          <p class="driver-number">${driver.driver.number}</p>
-          <p class="driver-nationality">${driver.driver.nationality}</p>
-          <p class="driver-birthday">${driver.driver.birthday}</p>
-          <p class="season-standings">CURRENT<br>STANDINGS</p>
-          <p class="driver-position">${driver.position}</p>
-          <p class="subheading">PLACE</p>
-          <p class="driver-points">${driver.points}</p>
-          <p class="subheading">POINTS</p>
-          <p class="driver-wins">${driver.wins}</p>
-          <p class="subheading">WINS</p>
-        </div>
-      </div>
-    `;
+  } catch (err) {
+    comparisonDiv.innerHTML = '<p style="color:red">Failed to load race schedule.</p>';
+    console.error('Error fetching race schedule:', err);
+  }
+}
+
+
+// Display race schedule information
+function displayRaceInfo(race) {
+  // Handle two possible shapes:
+  // 1) race.schedule exists with nested events (race.schedule.race, qualy, fp1...)
+  // 2) older shape with top-level date/time and circuit info
+
+  let html = `
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f5f5f5, #e0e0e0); border-radius: 10px; margin: 20px 0;">
+      <h2 style="color: #d32f2f; margin: 0 0 10px 0;">${race.raceName || race.name || ''}</h2>
+      <p style="font-size: 16px; margin: 6px 0;"><strong>Round:</strong> ${race.round || ''} ${race.season ? ('of ' + race.season) : ''}</p>
+  `;
+
+  // If circuit/location available (older shape)
+  if (race.circuit && race.circuit.name) {
+    html += `<p style="font-size:14px; margin:6px 0"><strong>Circuit:</strong> ${race.circuit.name} — ${race.circuit.location.city}, ${race.circuit.location.country}</p>`;
   }
 
-  let html = '<div style="display: flex; justify-content: center; gap: 35px;">';
-  html += `<div>${d1 ? driverCard(d1) : '<div class="driver-card"></div>'}</div>`;
-  html += `<div>${d2 ? driverCard(d2) : '<div class="driver-card"></div>'}</div>`;
+  // If schedule object exists, list each event
+  const schedule = race.schedule || {};
+  const eventOrder = ['fp1', 'fp2', 'fp3', 'qualy', 'sprintQualy', 'sprintRace', 'race'];
+
+  html += '<div style="margin-top:12px; text-align:left; display:inline-block;">';
+  html += '<table style="border-collapse:collapse; font-size:14px;"><tbody>';
+
+  let foundEvent = false;
+  for (const key of eventOrder) {
+    const ev = schedule[key];
+    if (ev && (ev.date || ev.time)) {
+      foundEvent = true;
+      const dtStr = formatEvent(ev.date, ev.time);
+      const label = key.toUpperCase();
+      html += `<tr><td style="padding:6px 12px; font-weight:600">${label}</td><td style="padding:6px 12px">${dtStr}</td></tr>`;
+    }
+  }
+
+  // Fallback for older flat fields
+  if (!foundEvent && (race.date || race.time)) {
+    const dtStr = formatEvent(race.date, race.time);
+    html += `<tr><td style="padding:6px 12px; font-weight:600">RACE</td><td style="padding:6px 12px">${dtStr}</td></tr>`;
+  }
+
+  html += '</tbody></table></div>';
+
   html += '</div>';
+
   comparisonDiv.innerHTML = html;
 }
 
-driver1Select.addEventListener('change', showComparison);
-driver2Select.addEventListener('change', showComparison);
+// Helper to format event date/time (returns readable string or 'TBA')
+function formatEvent(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return 'TBA';
+  // Construct an ISO datetime (UTC) and convert to local
+  const iso = `${dateStr}T${timeStr}`;
+  const dt = new Date(iso);
+  if (isNaN(dt)) return 'TBA';
+  return dt.toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' });
+}
 
-fetchDrivers();
+driver1Select.addEventListener('change', (e) => {
+  const raceId = e.target.value;
+  if (raceId) {
+    fetchRaceScheduleByRaceId(raceId);
+  } else {
+    comparisonDiv.innerHTML = '';
+  }
+});
