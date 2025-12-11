@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparing Current F1 Driver Standings</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <p class="title">Compare Your <span class="red-title">Grid Rivals</span></p>
+
+    <div class="selectors">
+        <div>
+            <label for="driver1">Driver 1</label><br />
+            <select id="driver1">
+                <option value="">Select a driver</option>
+
+                <optgroup label="ALPINE">
+                    <option value="3413">Franco Colapinto</option>
+                    <option value="3395">Pierre Gasly</option>
+                </optgroup>
+               
+                <optgroup label="ASTON MARTIN">
+                    <option value="3400">Fernando Alonso</option>
+                    <option value="3398">Lance Stroll</option>
+                </optgroup>
+
+                <optgroup label="SCUDERIA FERRARI">
+                    <option value="3410">Charles Leclerc</option>
+                    <option value="3401">Lewis Hamilton</option>
+                </optgroup>
+
+                <optgroup label="HAAS">
+                    <option value="3393">Esteban Ocon</option>
+                    <option value="3407">Oliver Bearman</option>
+                </optgroup>
+
+                <optgroup label="KICK SAUBER">
+                    <option value="3411">Gabriel Bortoleto</option>
+                    <option value="3405">Nico Hulkenberg</option>
+                </optgroup>
+
+                <optgroup label="MCLAREN">
+                    <option value="3403">Lando Norris</option>
+                    <option value="3399">Oscar Piastri</option>
+                </optgroup>
+
+                <optgroup label="MERCEDES">
+                    <option value="3404">George Russell</option>
+                    <option value="3409">Kimi Antonelli</option>
+                </optgroup>
+
+                <optgroup label="RACING BULLS">
+                    <option value="3402">Isack Hadjar</option>
+                    <option value="3394">Liam Lawson</option>
+                </optgroup>
+
+                <optgroup label="RED BULL RACING">
+                    <option value="3392">Max Verstappen</option>
+                    <option value="3397">Yuki Tsunoda</option>
+                </optgroup>
+
+                <optgroup label="WILLIAMS">
+                    <option value="3396">Alex Albon</option>
+                    <option value="3406">Carlos Sainz</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="driver2">Driver 2</label><br />
+            <select id="driver2">
+                                <option value="">Select a driver</option>
+
+                <optgroup label="ALPINE">
+                    <option value="3413">Franco Colapinto</option>
+                    <option value="3395">Pierre Gasly</option>
+                </optgroup>
+               
+                <optgroup label="ASTON MARTIN">
+                    <option value="3400">Fernando Alonso</option>
+                    <option value="3398">Lance Stroll</option>
+                </optgroup>
+
+                <optgroup label="SCUDERIA FERRARI">
+                    <option value="3410">Charles Leclerc</option>
+                    <option value="3401">Lewis Hamilton</option>
+                </optgroup>
+
+                <optgroup label="HAAS">
+                    <option value="3393">Esteban Ocon</option>
+                    <option value="3407">Oliver Bearman</option>
+                </optgroup>
+
+                <optgroup label="KICK SAUBER">
+                    <option value="3411">Gabriel Bortoleto</option>
+                    <option value="3405">Nico Hulkenberg</option>
+                </optgroup>
+
+                <optgroup label="MCLAREN">
+                    <option value="3403">Lando Norris</option>
+                    <option value="3399">Oscar Piastri</option>
+                </optgroup>
+
+                <optgroup label="MERCEDES">
+                    <option value="3404">George Russell</option>
+                    <option value="3409">Kimi Antonelli</option>
+                </optgroup>
+
+                <optgroup label="RACING BULLS">
+                    <option value="3402">Isack Hadjar</option>
+                    <option value="3394">Liam Lawson</option>
+                </optgroup>
+
+                <optgroup label="RED BULL RACING">
+                    <option value="3392">Max Verstappen</option>
+                    <option value="3397">Yuki Tsunoda</option>
+                </optgroup>
+
+                <optgroup label="WILLIAMS">
+                    <option value="3396">Alex Albon</option>
+                    <option value="3406">Carlos Sainz</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="comparison" class="comparison"></div>
+
+    <footer>
+        <p>Built and Designed by Zainab Ilyas for Sheridan College Interaction Design Fall 2025 System Design: Databases and Dynamic Data - Project 1.</p>
+        <p>Data sourced from <a href="https://f1api.dev/" target="_blank" rel="noopener noreferrer">F1 API</a>. Driver Images sourced from <a href="https://www.formula1.com/en/drivers.html" target="_blank" rel="noopener noreferrer">Official Formula 1 Website</a>.</p>
+
+</body>
+<script src="script.js"></script>
+</html>
