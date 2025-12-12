@@ -55,7 +55,7 @@ function displayRaceInfo(race) {
   }
 
   // Always show a small hover prompt to help users discover metric tooltips
-  html += `<p class="hover-note">Hover a forecast for more details.</p>`;
+  html += `<p class="hover-note">Hover a forecast metric for more details.</p>`;
 
   // Events: split into two rows. Top row for practice/qualifying, bottom row for Sprint Race and Race (larger)
   const schedule = race.schedule || {};

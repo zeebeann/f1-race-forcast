@@ -13,7 +13,6 @@ h1 {
 h2{
 	text-align: center;
 	margin-top: 20px;
-	color: #c20000;
 	font-family: 'Zen Dots', cursive;
 }
 
@@ -111,16 +110,16 @@ footer {
 }
 
 a {
-	color: #ff1e1e;
+	color: #ff0000;
 	text-decoration: none;
 }
 
 .red-title {
-	color: #c20000; 
+	color: #df0000; 
 }
 
 /* Race header title color */
-.race-title { color: #c20000; }
+.race-title { color: #ff1c1c; }
 
 /* Event card styles moved from inline JS */
 .event-card {
@@ -299,8 +298,8 @@ a {
 
 /* Small prompt shown under the race header to hint tooltip interaction */
 .hover-note {
-	color: #d8d8d8;
-	font-size: 13px;
+	color: #ffffff;
+	font-size: 16px;
 	text-align: center;
 	margin-top: 6px;
 	margin-bottom: 6px;
