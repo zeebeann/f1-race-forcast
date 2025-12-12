@@ -239,11 +239,24 @@ a {
 .metric-value.precip-red { color: #D20000; }
 .metric-value.precip-neutral { color: #999; }
 
-.metric.metric-wind .metric-value { 
-	color: #06c; 
-}
+/* Wind color-coding */
+.metric-value.wind-green { color: #00B91C; }
+.metric-value.wind-yellow { color: #F6C100; }
+.metric-value.wind-orange { color: #ED6700; }
+.metric-value.wind-red { color: #D20000; }
+.metric-value.wind-neutral { color: #999; }
 
-.metric.metric-humidity .metric-value { color: #666; }
+/* Humidity color-coding */
+.metric-value.humidity-green { color: #00B91C; }
+.metric-value.humidity-yellow { color: #F6C100; }
+.metric-value.humidity-orange { color: #ED6700; }
+.metric-value.humidity-red { color: #D20000; }
+.metric-value.humidity-neutral { color: #999; }
+
+/* Wind-specific font-size for metric values only */
+.metric.metric-wind .metric-value { font-size: 14.5px; }
+
+/* per-metric overrides removed to allow value-specific classes to control color */
 
 /* Keep event rows centered and scrollable as before */
 #events-top, #events-bottom {

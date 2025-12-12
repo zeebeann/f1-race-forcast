@@ -246,8 +246,41 @@ async function fetchTempsForRenderedCards() {
             precipValueEl.className = 'metric-value precip-green';
           }
         }
-        windValueEl.textContent = w === null ? 'N/A' : `${w.toFixed(1)} km/h`;
-        humidityValueEl.textContent = h === null ? 'N/A' : `${Math.round(h)} %`;
+        // Set wind value and apply color-coding class based on ranges (km/h)
+        if (w === null) {
+          windValueEl.textContent = 'N/A';
+          windValueEl.className = 'metric-value wind-neutral';
+        } else {
+          windValueEl.textContent = `${w.toFixed(1)} km/h`;
+          // Color-code: green (<15), yellow (>15), orange (>30), red (>45)
+          if (w > 45) {
+            windValueEl.className = 'metric-value wind-red';
+          } else if (w > 30) {
+            windValueEl.className = 'metric-value wind-orange';
+          } else if (w > 15) {
+            windValueEl.className = 'metric-value wind-yellow';
+          } else {
+            windValueEl.className = 'metric-value wind-green';
+          }
+        }
+        // Set humidity value and apply color-coding class based on ranges (%):
+        // green (<70), yellow (>70), orange (>80), red (>90)
+        if (h === null) {
+          humidityValueEl.textContent = 'N/A';
+          humidityValueEl.className = 'metric-value humidity-neutral';
+        } else {
+          const hr = Math.round(h);
+          humidityValueEl.textContent = `${hr} %`;
+          if (hr > 90) {
+            humidityValueEl.className = 'metric-value humidity-red';
+          } else if (hr > 80) {
+            humidityValueEl.className = 'metric-value humidity-orange';
+          } else if (hr > 70) {
+            humidityValueEl.className = 'metric-value humidity-yellow';
+          } else {
+            humidityValueEl.className = 'metric-value humidity-green';
+          }
+        }
 
         weatherData.push({
           event: eventName,
@@ -290,23 +323,41 @@ async function fetchTempsForRenderedCards() {
 
 // Geocode city name -> prefer result matching country
 async function geocodeCity(name, country) {
-  if (!name) return null;
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=10&language=en`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!data || !data.results || data.results.length === 0) return null;
-    // try to find exact country match (case-insensitive)
+  if (!name && !country) return null;
+
+  // Helper to query the geocoding API for a given query string
+  async function queryGeocode(q) {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data || !data.results || data.results.length === 0) return null;
+      return data.results;
+    } catch (err) {
+      console.error('Geocoding error for', q, err);
+      return null;
+    }
+  }
+
+  // Try a series of fallbacks: exact name, "name, country", then country alone.
+  const queries = [];
+  if (name) queries.push(name);
+  if (name && country) queries.push(`${name}, ${country}`);
+  if (country) queries.push(country);
+
+  for (const q of queries) {
+    const results = await queryGeocode(q);
+    if (!results) continue;
+    // prefer an exact country match when country provided
     if (country) {
-      const found = data.results.find(r => r.country && r.country.toLowerCase() === country.toLowerCase());
+      const found = results.find(r => r.country && r.country.toLowerCase() === country.toLowerCase());
       if (found) return found;
     }
-    // fallback: return first result
-    return data.results[0];
-  } catch (err) {
-    console.error('Geocoding error', err);
-    return null;
+    // otherwise return the first useful result
+    return results[0];
   }
+
+  return null;
 }
 
 // Get weather metrics at given lat/lon and ISO datetime using Open-Meteo archive API
