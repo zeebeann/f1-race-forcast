@@ -104,10 +104,13 @@ function displayRaceInfo(race) {
 // After rendering, fetch temperature for each event card using Open-Meteo
 async function fetchTempsForRenderedCards() {
   const cards = document.querySelectorAll('.event-card');
+  const weatherData = [];
+
   for (const card of cards) {
     const city = card.dataset.city;
     const country = card.dataset.country;
     const iso = card.dataset.iso; // e.g. 2025-03-16T04:00:00Z
+    const eventName = card.dataset.event;
 
     // add placeholder
     let tempEl = card.querySelector('.event-temp');
@@ -124,6 +127,16 @@ async function fetchTempsForRenderedCards() {
 
     if (!city) {
       tempEl.textContent = 'No city data';
+      weatherData.push({
+        event: eventName,
+        city,
+        country,
+        iso,
+        latitude: null,
+        longitude: null,
+        temperature: null,
+        status: 'No city data'
+      });
       continue;
     }
 
@@ -131,19 +144,62 @@ async function fetchTempsForRenderedCards() {
       const geo = await geocodeCity(city, country);
       if (!geo) {
         tempEl.textContent = 'Location not found';
+        weatherData.push({
+          event: eventName,
+          city,
+          country,
+          iso,
+          latitude: null,
+          longitude: null,
+          temperature: null,
+          status: 'Location not found'
+        });
         continue;
       }
       const temp = await getTemperatureAt(geo.latitude, geo.longitude, iso);
       if (temp === null || typeof temp === 'undefined') {
         tempEl.textContent = 'Temp N/A';
+        weatherData.push({
+          event: eventName,
+          city,
+          country,
+          iso,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          temperature: null,
+          status: 'Temp N/A'
+        });
       } else {
         tempEl.textContent = `${temp} °C`;
+        weatherData.push({
+          event: eventName,
+          city,
+          country,
+          iso,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          temperature: temp,
+          unit: '°C'
+        });
       }
     } catch (err) {
       console.error('Error fetching temp for', city, err);
       tempEl.textContent = 'Error';
+      weatherData.push({
+        event: eventName,
+        city,
+        country,
+        iso,
+        latitude: null,
+        longitude: null,
+        temperature: null,
+        status: 'Error: ' + err.message
+      });
     }
   }
+
+  console.log('📊 Weather data collected for selected race:');
+  console.table(weatherData);
 }
 
 // Geocode city name -> prefer result matching country
