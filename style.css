@@ -296,3 +296,14 @@ a {
 
 /* bottom row uses larger gap */
 #events-bottom { gap: 18px; margin-top: 12px; }
+
+/* Small prompt shown under the race header to hint tooltip interaction */
+.hover-note {
+	color: #d8d8d8;
+	font-size: 13px;
+	text-align: center;
+	margin-top: 6px;
+	margin-bottom: 6px;
+	font-style: italic;
+	opacity: 0.95;
+}

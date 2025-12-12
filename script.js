@@ -54,6 +54,9 @@ function displayRaceInfo(race) {
     html += `<p style="font-size:14px; margin:6px 0"><strong>Circuit:</strong> ${race.circuit.name} — ${race.circuit.location.city}, ${race.circuit.location.country}</p>`;
   }
 
+  // Always show a small hover prompt to help users discover metric tooltips
+  html += `<p class="hover-note">Hover a forecast for more details.</p>`;
+
   // Events: split into two rows. Top row for practice/qualifying, bottom row for Sprint Race and Race (larger)
   const schedule = race.schedule || {};
   const topOrder = ['fp1', 'fp2', 'fp3', 'qualy', 'sprintQualy'];
@@ -245,14 +248,19 @@ async function fetchTempsForRenderedCards() {
         } else {
           precipValueEl.textContent = `${p.toFixed(1)} mm`;
           // Color-code: green (<0.1), yellow (>0.1), orange (>1), red (>3.5)
+          const precipWrap = metricsContainer.querySelector('.metric.metric-precip');
           if (p > 3.5) {
             precipValueEl.className = 'metric-value precip-red';
+            if (precipWrap) precipWrap.dataset.tooltip = "Severe rainfall causes aquaplaning and low visibility. Safety Car or red flag conditions likely.";
           } else if (p > 1) {
             precipValueEl.className = 'metric-value precip-orange';
+            if (precipWrap) precipWrap.dataset.tooltip = "Grip significantly reduced. Tire changes become mandatory, visibility declines, and race strategy shifts quickly.";
           } else if (p > 0.1) {
             precipValueEl.className = 'metric-value precip-yellow';
+            if (precipWrap) precipWrap.dataset.tooltip = "Light rain or increasing threat. Teams prepare for strategy changes and possible switch to intermediates.";
           } else {
             precipValueEl.className = 'metric-value precip-green';
+            if (precipWrap) precipWrap.dataset.tooltip = "No rainfall expected. Maximum grip, predictable tire behavior, and stable race conditions.";
           }
         }
         // Set wind value and apply color-coding class based on ranges (km/h)
@@ -262,14 +270,19 @@ async function fetchTempsForRenderedCards() {
         } else {
           windValueEl.textContent = `${w.toFixed(1)} km/h`;
           // Color-code: green (<15), yellow (>15), orange (>30), red (>45)
+          const windWrap = metricsContainer.querySelector('.metric.metric-wind');
           if (w > 45) {
             windValueEl.className = 'metric-value wind-red';
+            if (windWrap) windWrap.dataset.tooltip = "Severe gusts can unsettle the car dramatically. High risk of incidents and possible session delays.";
           } else if (w > 30) {
             windValueEl.className = 'metric-value wind-orange';
+            if (windWrap) windWrap.dataset.tooltip = "Aero balance becomes unpredictable. Cars are harder to control, especially under braking and in high-speed sections.";
           } else if (w > 15) {
             windValueEl.className = 'metric-value wind-yellow';
+            if (windWrap) windWrap.dataset.tooltip = "Crosswinds start affecting turn-in and braking points. Drivers may feel instability in fast corners.";
           } else {
             windValueEl.className = 'metric-value wind-green';
+            if (windWrap) windWrap.dataset.tooltip = "Minimal aero disturbance. Drivers can rely on consistent handling and braking stability.";
           }
         }
         // Set humidity value and apply color-coding class based on ranges (%):
@@ -280,14 +293,19 @@ async function fetchTempsForRenderedCards() {
         } else {
           const hr = Math.round(h);
           humidityValueEl.textContent = `${hr}%`;
+          const humidityWrap = metricsContainer.querySelector('.metric.metric-humidity');
           if (hr > 90) {
             humidityValueEl.className = 'metric-value humidity-red';
+            if (humidityWrap) humidityWrap.dataset.tooltip = "Severe strain on drivers and car cooling. High likelihood of thunderstorms or rapid weather changes.";
           } else if (hr > 80) {
             humidityValueEl.className = 'metric-value humidity-orange';
+            if (humidityWrap) humidityWrap.dataset.tooltip = "Rain becomes likely and conditions feel heavier for drivers. Cooling systems work harder.";
           } else if (hr > 70) {
             humidityValueEl.className = 'metric-value humidity-yellow';
+            if (humidityWrap) humidityWrap.dataset.tooltip = "Higher humidity increases the chance of rain and may influence cooling efficiency slightly.";
           } else {
             humidityValueEl.className = 'metric-value humidity-green';
+            if (humidityWrap) humidityWrap.dataset.tooltip = "Clear, stable conditions. No effect on performance and minimal chance of weather-related surprises.";
           }
         }
 
