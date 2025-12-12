@@ -44,9 +44,9 @@ function displayRaceInfo(race) {
 
   // Header (title + round)
   let html = `
-    <div style="text-align: center; padding: 20px; background: transparent; border-radius: 10px; margin: 20px 0;">
-      <h2 class="race-title" style="margin: 0 0 10px 0;">${race.raceName || race.name || ''}</h2>
-      <p style="font-size: 16px; margin: 6px 0;"><strong>Round:</strong> ${race.round || ''} ${race.season ? ('of ' + race.season) : ''}</p>
+    <div style="text-align: center; padding: 8px 0 6px 0; background: transparent; border-radius: 10px; margin: 4px 0 4px 0;">
+      <h2 class="race-title" style="margin: 0 0 6px 0;">${race.raceName || race.name || ''}</h2>
+      <p style="font-size: 16px; margin: 4px 0 0 0;"><strong>Round:</strong> ${race.round || ''} ${race.season ? ('of ' + race.season) : ''}</p>
   `;
 
   // Circuit info (if present)
@@ -270,7 +270,7 @@ async function fetchTempsForRenderedCards() {
           humidityValueEl.className = 'metric-value humidity-neutral';
         } else {
           const hr = Math.round(h);
-          humidityValueEl.textContent = `${hr} %`;
+          humidityValueEl.textContent = `${hr}%`;
           if (hr > 90) {
             humidityValueEl.className = 'metric-value humidity-red';
           } else if (hr > 80) {

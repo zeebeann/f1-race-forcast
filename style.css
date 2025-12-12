@@ -19,11 +19,12 @@ h2{
 
 .selectors {
 	display: flex;
-	justify-content: center;
-	align-items: center;
-	max-width: 900px;
-	margin: 40px auto 20px auto;
-	gap: 40px;
+ 	justify-content: center;
+ 	align-items: center;
+ 	max-width: 900px;
+	/* reduced bottom margin to tighten gap to results */
+	margin: 40px auto 4px auto;
+ 	gap: 40px;
 }
 
 .selectors > div {
