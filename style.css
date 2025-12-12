@@ -10,6 +10,13 @@ h1 {
 	margin-top: 30px;
 }
 
+h2{
+	text-align: center;
+	margin-top: 20px;
+	color: #c20000;
+	font-family: 'Zen Dots', cursive;
+}
+
 .selectors {
 	display: flex;
 	justify-content: center;
@@ -110,3 +117,143 @@ a {
 .red-title {
 	color: #c20000; 
 }
+
+/* Race header title color */
+.race-title { color: #c20000; }
+
+/* Event card styles moved from inline JS */
+.event-card {
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+	padding: 12px;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	color: #111;
+}
+.event-card.small {
+	flex: 0 0 220px;
+	width: 220px;
+	background-image: linear-gradient(to bottom, #ffffff, #000000);
+	margin-bottom: 10px;
+	padding-bottom: 20px;
+}
+.event-card.large {
+	flex: 0 0 340px;
+	width: 340px;
+	padding-bottom: 30px;
+	background-image: linear-gradient(to bottom, #7F0000, #000000);
+}
+.event-title {
+	margin: 0 0 8px 0;
+	font-weight: 700;
+	font-size: 17px;
+	font-family: Zen Dots, cursive;
+	
+}
+.event-card.large .event-title { 
+	font-size: 20px;
+	color: #fff;
+}
+.event-card.large .event-date { 
+	color: #fff;
+	font-size: 15px;
+}
+.event-date {
+	margin: 0;
+	color: #333;
+	font-size: 14px;
+	line-height: 1.1;
+}
+
+.event-temp { 
+	margin: 8px 0 0 0; 
+	font-weight: 600; 
+	color: #111; 
+}
+
+.event-card.large .event-time { 
+	margin: 4px 0 0 0; 
+	color: #ffffff; 
+}
+
+.event-time{
+	font-size: 15px;
+	letter-spacing: 1px;
+}
+
+.event-precip, .event-wind, .event-humidity { 
+	margin: 4px 0 0 0; 
+	color: #444; 
+	font-size: 13px; 
+}
+
+/* New structured metric styles */
+.metrics { 
+	display: flex; 
+	flex-wrap: wrap; 
+	gap: 8px; 
+	justify-content: center; 
+	width: 100%; 
+	margin-top: 8px; 
+}
+
+.metric { 
+	display: flex; 
+	flex-direction: column-reverse; 
+	align-items: center; 
+	margin-top: 0; 
+	flex: 0 0 calc(50% - 8px); 
+	box-sizing: border-box; 
+}
+
+.metric-label { 
+	margin: 0; 
+	font-size: 12px; 
+	color: #ffffff; 
+	text-transform: uppercase; 
+	letter-spacing: 0.6px; 
+}
+
+.metric-value { 
+	margin: 4px 0 0 0; 
+	font-size: 16px; 
+	font-weight: 700; 
+	color: #111; 
+	font-family: 'Zen Dots', cursive; 
+}
+
+/* Temperature color-coding based on ranges */
+.metric-value.temp-green { color: #00B91C; }
+.metric-value.temp-yellow { color: #F6C100; }
+.metric-value.temp-orange { color: #ED6700; }
+.metric-value.temp-red { color: #D20000; }
+.metric-value.temp-neutral { color: #999; }
+
+.metric.metric-precip .metric-value { 
+	color: #0b6; 
+}
+
+.metric.metric-wind .metric-value { 
+	color: #06c; 
+}
+
+.metric.metric-humidity .metric-value { color: #666; }
+
+/* Keep event rows centered and scrollable as before */
+#events-top, #events-bottom {
+	margin-top: 12px;
+	display: flex;
+	flex-direction: row;
+	gap: 12px;
+	align-items: flex-start;
+	justify-content: center;
+	overflow-x: auto;
+	padding: 8px 12px;
+}
+
+/* bottom row uses larger gap */
+#events-bottom { gap: 18px; margin-top: 12px; }

@@ -45,7 +45,7 @@ function displayRaceInfo(race) {
   // Header (title + round)
   let html = `
     <div style="text-align: center; padding: 20px; background: transparent; border-radius: 10px; margin: 20px 0;">
-      <h2 style="color: #d32f2f; margin: 0 0 10px 0;">${race.raceName || race.name || ''}</h2>
+      <h2 class="race-title" style="margin: 0 0 10px 0;">${race.raceName || race.name || ''}</h2>
       <p style="font-size: 16px; margin: 6px 0;"><strong>Round:</strong> ${race.round || ''} ${race.season ? ('of ' + race.season) : ''}</p>
   `;
 
@@ -112,49 +112,44 @@ async function fetchTempsForRenderedCards() {
     const iso = card.dataset.iso; // e.g. 2025-03-16T04:00:00Z
     const eventName = card.dataset.event;
 
-    // Ensure elements exist for each metric (order: temp, precipitation, wind, humidity)
-    let tempEl = card.querySelector('.event-temp');
-    let precipEl = card.querySelector('.event-precip');
-    let windEl = card.querySelector('.event-wind');
-    let humidityEl = card.querySelector('.event-humidity');
-
-    if (!tempEl) {
-      tempEl = document.createElement('p');
-      tempEl.className = 'event-temp';
-      tempEl.style.margin = '8px 0 0 0';
-      tempEl.style.fontWeight = '600';
-      card.appendChild(tempEl);
-    }
-    if (!precipEl) {
-      precipEl = document.createElement('p');
-      precipEl.className = 'event-precip';
-      precipEl.style.margin = '4px 0 0 0';
-      precipEl.style.color = '#444';
-      card.appendChild(precipEl);
-    }
-    if (!windEl) {
-      windEl = document.createElement('p');
-      windEl.className = 'event-wind';
-      windEl.style.margin = '4px 0 0 0';
-      windEl.style.color = '#444';
-      card.appendChild(windEl);
-    }
-    if (!humidityEl) {
-      humidityEl = document.createElement('p');
-      humidityEl.className = 'event-humidity';
-      humidityEl.style.margin = '4px 0 0 0';
-      humidityEl.style.color = '#444';
-      card.appendChild(humidityEl);
+    // Ensure there's a metrics container to hold metric blocks in a grid
+    let metricsContainer = card.querySelector('.metrics');
+    if (!metricsContainer) {
+      metricsContainer = document.createElement('div');
+      metricsContainer.className = 'metrics';
+      card.appendChild(metricsContainer);
     }
 
-    // Set loading placeholders
-    tempEl.textContent = 'Loading temp…';
-    precipEl.textContent = '';
-    windEl.textContent = '';
-    humidityEl.textContent = '';
+    // Ensure metric blocks exist inside the metrics container. Each metric is structured as:
+    // <div class="metric metric-XXX"><p class="metric-label">Label</p><p class="metric-value">Value</p></div>
+    function ensureMetric(container, key, labelText, initialText) {
+      let wrapper = container.querySelector(`.metric.metric-${key}`);
+      if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = `metric metric-${key}`;
+        const lab = document.createElement('p');
+        lab.className = 'metric-label';
+        lab.textContent = labelText;
+        const val = document.createElement('p');
+        val.className = 'metric-value';
+        val.textContent = initialText || '';
+        wrapper.appendChild(lab);
+        wrapper.appendChild(val);
+        container.appendChild(wrapper);
+      } else {
+        const val = wrapper.querySelector('.metric-value');
+        if (val) val.textContent = initialText || '';
+      }
+      return wrapper.querySelector('.metric-value');
+    }
+
+    const tempValueEl = ensureMetric(metricsContainer, 'temp', 'Temp', 'Loading…');
+    const precipValueEl = ensureMetric(metricsContainer, 'precip', 'Precip', '');
+    const windValueEl = ensureMetric(metricsContainer, 'wind', 'Wind', '');
+    const humidityValueEl = ensureMetric(metricsContainer, 'humidity', 'Humidity', '');
 
     if (!city) {
-      tempEl.textContent = 'No city data';
+      tempValueEl.textContent = 'No city data';
       weatherData.push({
         event: eventName,
         city,
@@ -174,7 +169,7 @@ async function fetchTempsForRenderedCards() {
     try {
       const geo = await geocodeCity(city, country);
       if (!geo) {
-        tempEl.textContent = 'Location not found';
+        tempValueEl.textContent = 'Location not found';
         weatherData.push({
           event: eventName,
           city,
@@ -193,10 +188,10 @@ async function fetchTempsForRenderedCards() {
 
       const metrics = await getWeatherAt(geo.latitude, geo.longitude, iso);
       if (!metrics) {
-        tempEl.textContent = 'Data N/A';
-        precipEl.textContent = 'Precip: N/A';
-        windEl.textContent = 'Wind: N/A';
-        humidityEl.textContent = 'Humidity: N/A';
+        tempValueEl.textContent = 'Data N/A';
+        precipValueEl.textContent = 'N/A';
+        windValueEl.textContent = 'N/A';
+        humidityValueEl.textContent = 'N/A';
         weatherData.push({
           event: eventName,
           city,
@@ -216,10 +211,27 @@ async function fetchTempsForRenderedCards() {
         const w = (metrics.wind_kmh === null || typeof metrics.wind_kmh === 'undefined') ? null : Number(metrics.wind_kmh);
         const h = (metrics.humidity === null || typeof metrics.humidity === 'undefined') ? null : Number(metrics.humidity);
 
-        tempEl.textContent = t === null ? 'Temp: N/A' : `${t.toFixed(1)} °C`;
-        precipEl.textContent = p === null ? 'Precip: N/A' : `Precip: ${p.toFixed(1)} mm`;
-        windEl.textContent = w === null ? 'Wind: N/A' : `Wind: ${w.toFixed(1)} km/h`;
-        humidityEl.textContent = h === null ? 'Humidity: N/A' : `Humidity: ${Math.round(h)} %`;
+        // Set temperature value and apply color-coding class based on ranges
+        if (t === null) {
+          tempValueEl.textContent = 'N/A';
+          tempValueEl.className = 'metric-value temp-neutral';
+        } else {
+          tempValueEl.textContent = `${t.toFixed(1)} °C`;
+          // Color-code: green (14-28), yellow (<14 or >28), orange (<12 or >30), red (>35)
+          if (t > 35) {
+            tempValueEl.className = 'metric-value temp-red';
+          } else if (t < 12 || t > 30) {
+            tempValueEl.className = 'metric-value temp-orange';
+          } else if (t < 14 || t > 28) {
+            tempValueEl.className = 'metric-value temp-yellow';
+          } else {
+            tempValueEl.className = 'metric-value temp-green';
+          }
+        }
+
+        precipValueEl.textContent = p === null ? 'N/A' : `${p.toFixed(1)} mm`;
+        windValueEl.textContent = w === null ? 'N/A' : `${w.toFixed(1)} km/h`;
+        humidityValueEl.textContent = h === null ? 'N/A' : `${Math.round(h)} %`;
 
         weatherData.push({
           event: eventName,
@@ -236,10 +248,10 @@ async function fetchTempsForRenderedCards() {
       }
     } catch (err) {
       console.error('Error fetching weather for', city, err);
-      tempEl.textContent = 'Error';
-      precipEl.textContent = '';
-      windEl.textContent = '';
-      humidityEl.textContent = '';
+      tempValueEl.textContent = 'Error';
+      precipValueEl.textContent = '';
+      windValueEl.textContent = '';
+      humidityValueEl.textContent = '';
       weatherData.push({
         event: eventName,
         city,
@@ -344,22 +356,35 @@ function createEventHTML(eventKey, ev, large = false, circuit = null) {
   const dateStr = ev.date || null;
   const timeStr = ev.time || null;
   const iso = (dateStr && timeStr) ? `${dateStr}T${timeStr}` : '';
-  const local = formatEvent(dateStr, timeStr);
+  const parts = formatEventParts(dateStr, timeStr);
   // Determine circuit city/country (support multiple shapes)
   const city = (circuit && (circuit.city || (circuit.location && (circuit.location.city || circuit.location.locality)))) || '';
   const country = (circuit && (circuit.country || (circuit.location && circuit.location.country))) || '';
-  // Adjust styling for large (bottom-row) cards
-  const cardWidth = large ? 340 : 220;
-  const titleSize = large ? '16px' : '14px';
-  const dateSize = large ? '15px' : '14px';
-
-  // Minimal styling; each card has data attributes for later weather API use
+  // Use CSS classes instead of inline styles; add 'large' modifier when needed
+  const sizeClass = large ? 'large' : 'small';
   return `
-    <div class="event-card" data-event="${eventKey}" data-iso="${iso}" data-city="${city}" data-country="${country}" style="flex:0 0 ${cardWidth}px; width:${cardWidth}px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.10); padding:12px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;">
-      <p style="margin:0 0 8px 0; font-weight:700; font-size:${titleSize}">${label}</p>
-      <p style="margin:0; color:#333; font-size:${dateSize}; line-height:1.1">${local}</p>
+    <div class="event-card ${sizeClass}" data-event="${eventKey}" data-iso="${iso}" data-city="${city}" data-country="${country}">
+      <p class="event-title">${label}</p>
+      <p class="event-date">${parts.date}</p>
+      <p class="event-time">${parts.time}</p>
     </div>
   `;
+}
+
+// Format event into separate date and time strings
+function formatEventParts(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return { date: 'TBA', time: '' };
+  const iso = `${dateStr}T${timeStr}`;
+  const dt = new Date(iso);
+  if (isNaN(dt)) return { date: 'TBA', time: '' };
+
+  const weekday = dt.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
+  const day = dt.getDate();
+  const month = dt.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
+  const year = dt.getFullYear();
+  const time = dt.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+  return { date: `${weekday} - ${day} ${month} ${year}`, time };
 }
 
 // Helper to format event date/time (returns string like: "FRI - 3 OCT 2025<br>09:00 PM" or 'TBA')
