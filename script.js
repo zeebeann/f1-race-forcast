@@ -229,7 +229,23 @@ async function fetchTempsForRenderedCards() {
           }
         }
 
-        precipValueEl.textContent = p === null ? 'N/A' : `${p.toFixed(1)} mm`;
+        // Set precipitation value and apply color-coding class based on ranges
+        if (p === null) {
+          precipValueEl.textContent = 'N/A';
+          precipValueEl.className = 'metric-value precip-neutral';
+        } else {
+          precipValueEl.textContent = `${p.toFixed(1)} mm`;
+          // Color-code: green (<0.1), yellow (>0.1), orange (>1), red (>3.5)
+          if (p > 3.5) {
+            precipValueEl.className = 'metric-value precip-red';
+          } else if (p > 1) {
+            precipValueEl.className = 'metric-value precip-orange';
+          } else if (p > 0.1) {
+            precipValueEl.className = 'metric-value precip-yellow';
+          } else {
+            precipValueEl.className = 'metric-value precip-green';
+          }
+        }
         windValueEl.textContent = w === null ? 'N/A' : `${w.toFixed(1)} km/h`;
         humidityValueEl.textContent = h === null ? 'N/A' : `${Math.round(h)} %`;
 

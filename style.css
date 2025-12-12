@@ -226,16 +226,18 @@ a {
 	font-family: 'Zen Dots', cursive; 
 }
 
-/* Temperature color-coding based on ranges */
 .metric-value.temp-green { color: #00B91C; }
 .metric-value.temp-yellow { color: #F6C100; }
 .metric-value.temp-orange { color: #ED6700; }
 .metric-value.temp-red { color: #D20000; }
 .metric-value.temp-neutral { color: #999; }
 
-.metric.metric-precip .metric-value { 
-	color: #0b6; 
-}
+/* Precipitation color-coding */
+.metric-value.precip-green { color: #00B91C; }
+.metric-value.precip-yellow { color: #F6C100; }
+.metric-value.precip-orange { color: #ED6700; }
+.metric-value.precip-red { color: #D20000; }
+.metric-value.precip-neutral { color: #999; }
 
 .metric.metric-wind .metric-value { 
 	color: #06c; 
