@@ -97,6 +97,105 @@ function displayRaceInfo(race) {
   html += '</div>'; // main wrapper
 
   comparisonDiv.innerHTML = html;
+  // After rendering the cards, fetch temperatures for each event
+  fetchTempsForRenderedCards();
+}
+
+// After rendering, fetch temperature for each event card using Open-Meteo
+async function fetchTempsForRenderedCards() {
+  const cards = document.querySelectorAll('.event-card');
+  for (const card of cards) {
+    const city = card.dataset.city;
+    const country = card.dataset.country;
+    const iso = card.dataset.iso; // e.g. 2025-03-16T04:00:00Z
+
+    // add placeholder
+    let tempEl = card.querySelector('.event-temp');
+    if (!tempEl) {
+      tempEl = document.createElement('p');
+      tempEl.className = 'event-temp';
+      tempEl.style.margin = '8px 0 0 0';
+      tempEl.style.fontWeight = '600';
+      tempEl.textContent = 'Loading temp…';
+      card.appendChild(tempEl);
+    } else {
+      tempEl.textContent = 'Loading temp…';
+    }
+
+    if (!city) {
+      tempEl.textContent = 'No city data';
+      continue;
+    }
+
+    try {
+      const geo = await geocodeCity(city, country);
+      if (!geo) {
+        tempEl.textContent = 'Location not found';
+        continue;
+      }
+      const temp = await getTemperatureAt(geo.latitude, geo.longitude, iso);
+      if (temp === null || typeof temp === 'undefined') {
+        tempEl.textContent = 'Temp N/A';
+      } else {
+        tempEl.textContent = `${temp} °C`;
+      }
+    } catch (err) {
+      console.error('Error fetching temp for', city, err);
+      tempEl.textContent = 'Error';
+    }
+  }
+}
+
+// Geocode city name -> prefer result matching country
+async function geocodeCity(name, country) {
+  if (!name) return null;
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=10&language=en`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data || !data.results || data.results.length === 0) return null;
+    // try to find exact country match (case-insensitive)
+    if (country) {
+      const found = data.results.find(r => r.country && r.country.toLowerCase() === country.toLowerCase());
+      if (found) return found;
+    }
+    // fallback: return first result
+    return data.results[0];
+  } catch (err) {
+    console.error('Geocoding error', err);
+    return null;
+  }
+}
+
+// Get temperature (Celsius) at given lat/lon and ISO datetime using Open-Meteo archive API
+async function getTemperatureAt(latitude, longitude, iso) {
+  if (!latitude || !longitude || !iso) return null;
+  const dt = new Date(iso);
+  if (isNaN(dt)) return null;
+  const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${date}&end_date=${date}&hourly=temperature_2m&timezone=UTC`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data || !data.hourly || !data.hourly.time) return null;
+    const times = data.hourly.time; // e.g. "2025-03-16T04:00"
+    const temps = data.hourly.temperature_2m;
+    // build target string in UTC without seconds: YYYY-MM-DDTHH:MM
+    const target = dt.toISOString().slice(0, 16);
+    // find exact match
+    const idx = times.findIndex(t => t === target);
+    if (idx === -1) {
+      // try matching without 'T' separator or with timezone offsets
+      const idx2 = times.findIndex(t => t.startsWith(target.slice(0, 13))); // match hour
+      if (idx2 === -1) return null;
+      return temps[idx2];
+    }
+    return temps[idx];
+  } catch (err) {
+    console.error('Weather API error', err);
+    return null;
+  }
 }
 
 // Helper to build an event card HTML string
