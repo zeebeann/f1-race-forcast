@@ -254,6 +254,29 @@ a {
 .metric-value.humidity-red { color: #D20000; }
 .metric-value.humidity-neutral { color: #999; }
 
+/* Tooltip for metric wrappers using data-tooltip attribute */
+.metric[data-tooltip] {
+	position: relative;
+}
+.metric[data-tooltip]:hover::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(0,0,0,0.85);
+	color: #fff;
+	padding: 8px 10px;
+	border-radius: 6px;
+	white-space: pre-wrap;
+	width: 220px;
+	text-align: left;
+	font-size: 14px;
+	line-height: 1.2;
+	z-index: 1200;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
 /* Wind-specific font-size for metric values only */
 .metric.metric-wind .metric-value { font-size: 14.5px; }
 

@@ -217,15 +217,24 @@ async function fetchTempsForRenderedCards() {
           tempValueEl.className = 'metric-value temp-neutral';
         } else {
           tempValueEl.textContent = `${t.toFixed(1)} °C`;
-          // Color-code: green (14-28), yellow (<14 or >28), orange (<12 or >30), red (>35)
+          // Color-code: green (15-28), yellow (<14 or >28), orange (<12 or >30), red (>35)
           if (t > 35) {
             tempValueEl.className = 'metric-value temp-red';
+            // attach tooltip text for this condition
+            const tempWrapRed = metricsContainer.querySelector('.metric.metric-temp');
+            if (tempWrapRed) tempWrapRed.dataset.tooltip = "Extreme temperatures risk severe tire degradation and driver health issues. Car cooling becomes critical.";
           } else if (t < 12 || t > 30) {
             tempValueEl.className = 'metric-value temp-orange';
-          } else if (t < 14 || t > 28) {
+            const tempWrapOrange = metricsContainer.querySelector('.metric.metric-temp');
+            if (tempWrapOrange) tempWrapOrange.dataset.tooltip = "Tire degradation becomes a major factor. Drivers may struggle with grip, overheating, or maintaining tire life.";
+          } else if (t < 15 || t > 28) {
             tempValueEl.className = 'metric-value temp-yellow';
+            const tempWrapYellow = metricsContainer.querySelector('.metric.metric-temp');
+            if (tempWrapYellow) tempWrapYellow.dataset.tooltip = "Temperatures may start affecting tire performance. Warmer air accelerates wear; cooler air makes warm-up harder.";
           } else {
             tempValueEl.className = 'metric-value temp-green';
+            const tempWrapGreen = metricsContainer.querySelector('.metric.metric-temp');
+            if (tempWrapGreen) tempWrapGreen.dataset.tooltip = "Perfect conditions. Tires warm up easily and degradation remains stable, allowing drivers to push consistently.";
           }
         }
 
