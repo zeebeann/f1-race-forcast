@@ -348,9 +348,18 @@ async function fetchTempsForRenderedCards() {
   console.table(weatherData);
 }
 
-// Geocode city name -> prefer result matching country
+// simple in-memory cache for geocoding results keyed by "city|country"
+const _geoCache = {};
+
+// Geocode city name -> prefer result matching country.  Results are cached
+// so that once a race/event has been looked up we don't hit the API again.
 async function geocodeCity(name, country) {
   if (!name && !country) return null;
+
+  const cacheKey = `${name || ''}|${country || ''}`;
+  if (_geoCache[cacheKey]) {
+    return _geoCache[cacheKey];
+  }
 
   // Helper to query the geocoding API for a given query string
   async function queryGeocode(q) {
@@ -372,19 +381,27 @@ async function geocodeCity(name, country) {
   if (name && country) queries.push(`${name}, ${country}`);
   if (country) queries.push(country);
 
+  let finalResult = null;
   for (const q of queries) {
     const results = await queryGeocode(q);
     if (!results) continue;
     // prefer an exact country match when country provided
     if (country) {
       const found = results.find(r => r.country && r.country.toLowerCase() === country.toLowerCase());
-      if (found) return found;
+      if (found) {
+        finalResult = found;
+        break;
+      }
     }
     // otherwise return the first useful result
-    return results[0];
+    finalResult = results[0];
+    break;
   }
 
-  return null;
+  if (finalResult) {
+    _geoCache[cacheKey] = finalResult;
+  }
+  return finalResult;
 }
 
 // Get weather metrics at given lat/lon and ISO datetime using Open-Meteo archive API
@@ -395,8 +412,29 @@ async function getWeatherAt(latitude, longitude, iso) {
   if (isNaN(dt)) return null;
   const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
 
+  // Determine whether the requested date is in the future (or today) and
+  // choose the appropriate endpoint.  The forecast endpoint supports up to
+  // ~16 days and allows future lookups, whereas the archive endpoint only
+  // returns past/historical data.
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const useForecast = dt >= now;
+
   const vars = 'temperature_2m,relativehumidity_2m,windspeed_10m,precipitation';
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${date}&end_date=${date}&hourly=${vars}&timezone=UTC`;
+  let url;
+  if (useForecast) {
+    // future/today: forecast API (allow up to 16 days ahead)
+    // Note: forecast API doesn't accept start_date/end_date; it returns from today forward
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}` +
+          `&longitude=${longitude}&forecast_days=16` +
+          `&hourly=${vars}&timezone=UTC`;
+  } else {
+    // past: archive API
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}` +
+          `&longitude=${longitude}&start_date=${date}&end_date=${date}` +
+          `&hourly=${vars}&timezone=UTC`;
+  }
+
   try {
     const res = await fetch(url);
     const data = await res.json();
