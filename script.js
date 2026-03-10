@@ -100,9 +100,44 @@ function displayRaceInfo(race) {
   html += '</div>'; // main wrapper
 
   comparisonDiv.innerHTML = html;
-  // After rendering the cards, fetch temperatures for each event
+  // After rendering the cards, check if any event is more than 16 days ahead
+  showForecastWarningIfNeeded();
+  // Then fetch temperatures for each event
   fetchTempsForRenderedCards();
 }
+
+// Check if any event is more than 16 days in the future and show warning if so
+function showForecastWarningIfNeeded() {
+  const cards = document.querySelectorAll('.event-card');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const sixteenDaysMs = 16 * 24 * 60 * 60 * 1000;
+
+  let hasEventBeyond16Days = false;
+
+  for (const card of cards) {
+    const iso = card.dataset.iso; // e.g. "2025-03-16T04:00:00Z"
+    if (!iso) continue;
+
+    const eventDate = new Date(iso);
+    if (isNaN(eventDate)) continue;
+
+    const timeDiff = eventDate - now;
+    if (timeDiff > sixteenDaysMs) {
+      hasEventBeyond16Days = true;
+      break;
+    }
+  }
+
+  if (hasEventBeyond16Days) {
+    const warningBox = document.createElement('div');
+    warningBox.style.cssText = 'border: 2px solid #ffa500; border-radius: 8px; padding: 12px 16px; margin: 12px auto; max-width: 500px; background-color: rgba(255, 165, 0, 0.1); font-size: 14px; color: #ffffffff; text-align: center; font-style: italic;';
+    warningBox.innerHTML = '⚠️ Weather forecasts are only available up to 16 days in advance. Please check back closer to the race date.';
+    comparisonDiv.insertAdjacentElement('afterbegin', warningBox);
+  }
+}
+
+// 
 
 // After rendering, fetch weather metrics (temp, precipitation, wind, humidity) for each event card using Open-Meteo
 async function fetchTempsForRenderedCards() {
@@ -343,6 +378,7 @@ async function fetchTempsForRenderedCards() {
       });
     }
   }
+
 
   console.log('📊 Weather data collected for selected race:');
   console.table(weatherData);
